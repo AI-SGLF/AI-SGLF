@@ -21,9 +21,13 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
 .suggestion-item:last-child { border-bottom: none; }
 .suggestion-item:hover { background: #f5f5f5; }
 .error-msg { background: #fdecea; color: #c0392b; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem; }
-.tabs { display: flex; gap: 0; margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; }
+.tabs { display: flex; margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; }
 .tab { padding: 8px 14px; font-size: 13px; cursor: pointer; border: none; border-bottom: 2px solid transparent; color: #666; background: none; }
 .tab.active { color: #1a7fc4; border-bottom-color: #1a7fc4; font-weight: 500; }
+/* panels */
+.panel { display: none; }
+.panel.active { display: block; }
+/* hero */
 .hero { background: linear-gradient(135deg, #1a7fc4, #0e5a9e); border-radius: 12px; padding: 1.5rem; color: white; margin-bottom: 1rem; }
 .hero-city { font-size: 13px; opacity: 0.85; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
 .hero-main { display: flex; align-items: center; gap: 1.5rem; }
@@ -32,6 +36,7 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
 .hero-desc { font-size: 15px; margin-top: 8px; opacity: 0.95; }
 .weather-icon { font-size: 52px; line-height: 1; }
 .hero-wind { display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: 0.9; }
+/* hourly mini strip (tab aujourd'hui) */
 .hourly-strip { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
 .hour-cell { background: white; padding: 10px 6px; text-align: center; }
 .hour-cell.now { background: #1a7fc4; color: white; }
@@ -39,6 +44,7 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
 .hour-cell.now .hour-label { color: rgba(255,255,255,0.8); }
 .hour-icon { font-size: 20px; line-height: 1; margin: 2px 0; }
 .hour-temp { font-size: 14px; font-weight: 500; }
+/* bottom cards */
 .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .card { background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 1rem 1.25rem; }
 .card-title { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
@@ -53,12 +59,29 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
 .norm-ecart { font-size: 12px; font-weight: 500; margin-top: 4px; }
 .ecart-pos { color: #c0392b; }
 .ecart-neg { color: #2980b9; }
+/* tab "Par heure" : tableau complet 24h */
+.hourly-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+.hourly-table th { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.05em; padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; background: #f9f9f9; }
+.hourly-table td { padding: 9px 12px; font-size: 14px; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; }
+.hourly-table tr:last-child td { border-bottom: none; }
+.hourly-table tr.current-hour td { background: #eef6fc; font-weight: 500; }
+.hourly-table tr:hover td { background: #f5f5f5; }
+/* tab "Demain" */
+.demain-hero { background: linear-gradient(135deg, #2e7d6b, #1a5c4e); border-radius: 12px; padding: 1.5rem; color: white; margin-bottom: 1rem; }
+.day-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+.day-slot { background: white; padding: 10px 6px; text-align: center; }
+.day-slot-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+.day-slot-icon { font-size: 22px; line-height: 1; margin: 4px 0; }
+.day-slot-temp { font-size: 14px; font-weight: 500; }
+.day-slot-wind { font-size: 11px; color: #888; margin-top: 2px; }
+/* placeholder */
 .no-data { text-align: center; padding: 4rem 2rem; color: #888; font-size: 14px; background: white; border-radius: 12px; border: 1px solid #e0e0e0; }
 .no-data i { font-size: 36px; display: block; margin-bottom: 12px; color: #bbb; }
 @media (max-width: 480px) {
   .bottom-grid { grid-template-columns: 1fr; }
   .hero-temp { font-size: 48px; }
   .hourly-strip { grid-template-columns: repeat(4, 1fr); }
+  .day-slots { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -78,49 +101,100 @@ h1 { font-size: 20px; font-weight: 500; margin-bottom: 1rem; color: #1a1a1a; }
 
   <div id="weatherContent" style="display:none;">
     <div class="tabs">
-      <button class="tab active">Aujourd'hui</button>
-      <button class="tab">Par heure</button>
-      <button class="tab">Demain</button>
+      <button class="tab active" data-tab="today">Aujourd'hui</button>
+      <button class="tab" data-tab="hourly">Par heure</button>
+      <button class="tab" data-tab="tomorrow">Demain</button>
     </div>
 
-    <div class="hero">
-      <div class="hero-city" id="heroCity">—</div>
-      <div class="hero-main">
-        <div class="hero-temp" id="heroTemp">—</div>
-        <div class="hero-center">
-          <div class="weather-icon" id="heroIcon">⛅</div>
-          <div class="hero-desc" id="heroDesc">—</div>
+    <!-- PANEL : Aujourd'hui -->
+    <div class="panel active" id="panel-today">
+      <div class="hero">
+        <div class="hero-city" id="heroCity">—</div>
+        <div class="hero-main">
+          <div class="hero-temp" id="heroTemp">—</div>
+          <div class="hero-center">
+            <div class="weather-icon" id="heroIcon">⛅</div>
+            <div class="hero-desc" id="heroDesc">—</div>
+          </div>
+          <div class="hero-wind" id="heroWind"><i class="ti ti-wind"></i> —</div>
         </div>
-        <div class="hero-wind" id="heroWind">
-          <i class="ti ti-wind"></i> —
+      </div>
+      <div class="hourly-strip" id="hourlyStrip"></div>
+      <div class="bottom-grid">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-cloud-rain"></i> Pluie dans l'heure</div>
+          <div id="precipStatus" style="font-size:14px; font-weight:500; color:#1a1a1a;">—</div>
+          <div class="precip-bar" id="precipBar"></div>
+          <div class="precip-labels"><span>5 min</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-chart-line"></i> Comparaison aux normales</div>
+          <div class="norms">
+            <div class="norm-item">
+              <div class="norm-val" id="normMin">—</div>
+              <div class="norm-label">Minimale du jour</div>
+              <div class="norm-ecart" id="normMinEcart">—</div>
+            </div>
+            <div class="norm-item">
+              <div class="norm-val" id="normMax">—</div>
+              <div class="norm-label">Maximale du jour</div>
+              <div class="norm-ecart" id="normMaxEcart">—</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="hourly-strip" id="hourlyStrip"></div>
+    <!-- PANEL : Par heure -->
+    <div class="panel" id="panel-hourly">
+      <table class="hourly-table" id="hourlyTable">
+        <thead>
+          <tr>
+            <th>Heure</th>
+            <th>Conditions</th>
+            <th>Temp.</th>
+            <th>Précip.</th>
+            <th>Vent</th>
+          </tr>
+        </thead>
+        <tbody id="hourlyBody"></tbody>
+      </table>
+    </div>
 
-    <div class="bottom-grid">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-cloud-rain"></i> Pluie dans l'heure</div>
-        <div id="precipStatus" style="font-size:14px; font-weight:500; color:#1a1a1a;">—</div>
-        <div class="precip-bar" id="precipBar"></div>
-        <div class="precip-labels">
-          <span>5 min</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>
+    <!-- PANEL : Demain -->
+    <div class="panel" id="panel-tomorrow">
+      <div class="demain-hero" id="demainHero">
+        <div class="hero-city" id="demainCity">—</div>
+        <div class="hero-main">
+          <div class="hero-temp" id="demainTemp">—</div>
+          <div class="hero-center">
+            <div class="weather-icon" id="demainIcon">⛅</div>
+            <div class="hero-desc" id="demainDesc">—</div>
+          </div>
+          <div style="font-size:13px; opacity:0.9;" id="demainRange">— / —</div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title"><i class="ti ti-chart-line"></i> Comparaison aux normales</div>
-        <div class="norms">
-          <div class="norm-item">
-            <div class="norm-val" id="normMin">—</div>
-            <div class="norm-label">Minimale du jour</div>
-            <div class="norm-ecart" id="normMinEcart">—</div>
+      <div class="day-slots" id="daySlots"></div>
+      <div class="bottom-grid">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-chart-line"></i> Comparaison aux normales</div>
+          <div class="norms">
+            <div class="norm-item">
+              <div class="norm-val" id="normMinD">—</div>
+              <div class="norm-label">Minimale</div>
+              <div class="norm-ecart" id="normMinEcartD">—</div>
+            </div>
+            <div class="norm-item">
+              <div class="norm-val" id="normMaxD">—</div>
+              <div class="norm-label">Maximale</div>
+              <div class="norm-ecart" id="normMaxEcartD">—</div>
+            </div>
           </div>
-          <div class="norm-item">
-            <div class="norm-val" id="normMax">—</div>
-            <div class="norm-label">Maximale du jour</div>
-            <div class="norm-ecart" id="normMaxEcart">—</div>
-          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-droplet"></i> Précipitations</div>
+          <div id="demainPrecipText" style="font-size:14px; font-weight:500; color:#1a1a1a; margin-bottom:6px;">—</div>
+          <div id="demainPrecipDetail" style="font-size:13px; color:#666;">—</div>
         </div>
       </div>
     </div>
@@ -144,6 +218,23 @@ const WMO = {
   95:['Orageux','⛈️'], 96:['Orage avec grêle','⛈️'], 99:['Orage avec grêle forte','⛈️']
 };
 
+const normMins = [2,3,4,7,10,13,14,14,12,9,5,3];
+const normMaxs = [7,8,12,15,19,22,25,25,22,16,11,7];
+
+let currentData = null;
+let currentCity = '';
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Search
 const inp = document.getElementById('searchInput');
 const suggList = document.getElementById('suggList');
 let suggestTimeout;
@@ -154,16 +245,9 @@ inp.addEventListener('input', () => {
   if (q.length < 2) { suggList.style.display = 'none'; return; }
   suggestTimeout = setTimeout(() => fetchSuggestions(q), 300);
 });
-
-inp.addEventListener('keydown', e => {
-  if (e.key === 'Enter') { suggList.style.display = 'none'; doSearch(); }
-});
-
+inp.addEventListener('keydown', e => { if (e.key === 'Enter') { suggList.style.display = 'none'; doSearch(); } });
 document.getElementById('searchBtn').addEventListener('click', doSearch);
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.search-wrap')) suggList.style.display = 'none';
-});
+document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) suggList.style.display = 'none'; });
 
 async function fetchSuggestions(q) {
   const isPostal = /^\d{2,}/.test(q);
@@ -181,11 +265,7 @@ async function fetchSuggestions(q) {
       div.className = 'suggestion-item';
       const label = [item.name, item.admin1, item.country_code === 'FR' ? null : item.country].filter(Boolean).join(', ');
       div.textContent = label;
-      div.addEventListener('click', () => {
-        inp.value = item.name;
-        suggList.style.display = 'none';
-        loadWeather(item.latitude, item.longitude, label);
-      });
+      div.addEventListener('click', () => { inp.value = item.name; suggList.style.display = 'none'; loadWeather(item.latitude, item.longitude, label); });
       suggList.appendChild(div);
     });
     suggList.style.display = 'block';
@@ -197,8 +277,7 @@ async function doSearch() {
   if (!q) return;
   showError('');
   try {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=3&language=fr&format=json`;
-    const r = await fetch(url);
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=3&language=fr&format=json`);
     const d = await r.json();
     if (!d.results || !d.results.length) { showError('Ville non trouvée.'); return; }
     const item = d.results[0];
@@ -212,21 +291,33 @@ async function loadWeather(lat, lon, cityName) {
   document.getElementById('weatherContent').style.display = 'none';
   document.getElementById('placeholder').style.display = 'none';
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=2`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,weather_code,wind_speed_10m` +
+      `&hourly=temperature_2m,weather_code,precipitation_probability,wind_speed_10m` +
+      `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,precipitation_sum` +
+      `&timezone=auto&forecast_days=3`;
     const r = await fetch(url);
-    const d = await r.json();
-    renderWeather(d, cityName);
+    currentData = await r.json();
+    currentCity = cityName;
+    renderAll();
   } catch(e) {
     showError('Impossible de charger les données météo.');
     document.getElementById('placeholder').style.display = 'block';
   }
 }
 
-function renderWeather(d, cityName) {
+function renderAll() {
+  renderToday();
+  renderHourly();
+  renderTomorrow();
+  document.getElementById('weatherContent').style.display = 'block';
+}
+
+function renderToday() {
+  const d = currentData;
   const cur = d.current;
   const [desc, icon] = WMO[cur.weather_code] || ['—', '❓'];
-
-  document.getElementById('heroCity').textContent = cityName.toUpperCase();
+  document.getElementById('heroCity').textContent = currentCity.toUpperCase();
   document.getElementById('heroTemp').textContent = Math.round(cur.temperature_2m) + '°';
   document.getElementById('heroIcon').textContent = icon;
   document.getElementById('heroDesc').textContent = desc;
@@ -244,9 +335,8 @@ function renderWeather(d, cityName) {
     const isNow = shown === 0;
     const cell = document.createElement('div');
     cell.className = 'hour-cell' + (isNow ? ' now' : '');
-    const [, hIcon] = WMO[hours.weather_code[i]] || ['—', '❓'];
-    const label = isNow ? 'Maintenant' : t.getHours() + ':00';
-    cell.innerHTML = `<div class="hour-label">${label}</div><div class="hour-icon">${hIcon}</div><div class="hour-temp">${Math.round(hours.temperature_2m[i])}°</div>`;
+    const [, hIcon] = WMO[hours.weather_code[i]] || ['—','❓'];
+    cell.innerHTML = `<div class="hour-label">${isNow ? 'Maintenant' : t.getHours()+':00'}</div><div class="hour-icon">${hIcon}</div><div class="hour-temp">${Math.round(hours.temperature_2m[i])}°</div>`;
     strip.appendChild(cell);
     shown++;
   }
@@ -254,30 +344,112 @@ function renderWeather(d, cityName) {
   document.getElementById('precipStatus').textContent = 'Pas de précipitations';
   const bar = document.getElementById('precipBar');
   bar.innerHTML = '';
-  for (let i = 0; i < 6; i++) {
-    const col = document.createElement('div');
-    col.className = 'precip-col';
-    col.style.height = '100%';
-    bar.appendChild(col);
-  }
+  for (let i = 0; i < 6; i++) { const col = document.createElement('div'); col.className='precip-col'; col.style.height='100%'; bar.appendChild(col); }
 
   const daily = d.daily;
   const tMin = Math.round(daily.temperature_2m_min[0]);
   const tMax = Math.round(daily.temperature_2m_max[0]);
   const month = now.getMonth();
-  const normMins = [2,3,4,7,10,13,14,14,12,9,5,3];
-  const normMaxs = [7,8,12,15,19,22,25,25,22,16,11,7];
   const ecMin = tMin - normMins[month];
   const ecMax = tMax - normMaxs[month];
-
   document.getElementById('normMin').textContent = tMin + '°';
   document.getElementById('normMax').textContent = tMax + '°';
   document.getElementById('normMinEcart').textContent = (ecMin >= 0 ? '+' : '') + ecMin + '°';
   document.getElementById('normMaxEcart').textContent = (ecMax >= 0 ? '+' : '') + ecMax + '°';
   document.getElementById('normMinEcart').className = 'norm-ecart ' + (ecMin > 0 ? 'ecart-pos' : 'ecart-neg');
   document.getElementById('normMaxEcart').className = 'norm-ecart ' + (ecMax > 0 ? 'ecart-pos' : 'ecart-neg');
+}
 
-  document.getElementById('weatherContent').style.display = 'block';
+function renderHourly() {
+  const hours = currentData.hourly;
+  const now = new Date();
+  const tbody = document.getElementById('hourlyBody');
+  tbody.innerHTML = '';
+  const todayStr = now.toISOString().slice(0,10);
+  for (let i = 0; i < hours.time.length; i++) {
+    const t = new Date(hours.time[i]);
+    if (t.toISOString().slice(0,10) !== todayStr) continue;
+    const [desc, icon] = WMO[hours.weather_code[i]] || ['—','❓'];
+    const isCurrent = t.getHours() === now.getHours();
+    const tr = document.createElement('tr');
+    if (isCurrent) tr.className = 'current-hour';
+    const precip = hours.precipitation_probability[i];
+    tr.innerHTML = `
+      <td>${isCurrent ? '<strong>' : ''}${t.getHours()}:00${isCurrent ? '</strong>' : ''}</td>
+      <td>${icon} ${desc}</td>
+      <td><strong>${Math.round(hours.temperature_2m[i])}°</strong></td>
+      <td>${precip != null ? precip + ' %' : '—'}</td>
+      <td>${Math.round(hours.wind_speed_10m[i])} km/h</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderTomorrow() {
+  const d = currentData;
+  const daily = d.daily;
+  const hours = d.hourly;
+  const now = new Date();
+  const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0,10);
+  const dayIdx = daily.time.indexOf(tomorrowStr);
+  if (dayIdx === -1) return;
+
+  const tMin = Math.round(daily.temperature_2m_min[dayIdx]);
+  const tMax = Math.round(daily.temperature_2m_max[dayIdx]);
+  const wc = daily.weather_code[dayIdx];
+  const [desc, icon] = WMO[wc] || ['—','❓'];
+  const month = tomorrow.getMonth();
+
+  document.getElementById('demainCity').textContent = currentCity.toUpperCase() + ' — ' + tomorrow.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+  document.getElementById('demainTemp').textContent = tMax + '°';
+  document.getElementById('demainIcon').textContent = icon;
+  document.getElementById('demainDesc').textContent = desc;
+  document.getElementById('demainRange').textContent = tMin + '° / ' + tMax + '°';
+
+  // 4 créneaux : Matin, Après-midi, Soirée, Nuit
+  const slots = [
+    { label: 'Matin', hours: [6,7,8,9,10,11] },
+    { label: 'Après-midi', hours: [12,13,14,15,16,17] },
+    { label: 'Soirée', hours: [18,19,20,21] },
+    { label: 'Nuit', hours: [22,23,0,1,2,3] }
+  ];
+  const tomorrowHours = {};
+  hours.time.forEach((ts, i) => {
+    const t = new Date(ts);
+    if (t.toISOString().slice(0,10) === tomorrowStr) tomorrowHours[t.getHours()] = i;
+  });
+
+  const slotsEl = document.getElementById('daySlots');
+  slotsEl.innerHTML = '';
+  slots.forEach(slot => {
+    const idxs = slot.hours.map(h => tomorrowHours[h]).filter(x => x !== undefined);
+    if (!idxs.length) return;
+    const temps = idxs.map(i => hours.temperature_2m[i]);
+    const avgTemp = Math.round(temps.reduce((a,b)=>a+b,0)/temps.length);
+    const wcs = idxs.map(i => hours.weather_code[i]);
+    const slotWc = wcs[Math.floor(wcs.length/2)];
+    const [,sIcon] = WMO[slotWc] || ['—','❓'];
+    const winds = idxs.map(i => hours.wind_speed_10m[i]);
+    const avgWind = Math.round(winds.reduce((a,b)=>a+b,0)/winds.length);
+    const div = document.createElement('div');
+    div.className = 'day-slot';
+    div.innerHTML = `<div class="day-slot-label">${slot.label}</div><div class="day-slot-icon">${sIcon}</div><div class="day-slot-temp">${avgTemp}°</div><div class="day-slot-wind">${avgWind} km/h</div>`;
+    slotsEl.appendChild(div);
+  });
+
+  const ecMin = tMin - normMins[month];
+  const ecMax = tMax - normMaxs[month];
+  document.getElementById('normMinD').textContent = tMin + '°';
+  document.getElementById('normMaxD').textContent = tMax + '°';
+  document.getElementById('normMinEcartD').textContent = (ecMin >= 0 ? '+' : '') + ecMin + '°';
+  document.getElementById('normMaxEcartD').textContent = (ecMax >= 0 ? '+' : '') + ecMax + '°';
+  document.getElementById('normMinEcartD').className = 'norm-ecart ' + (ecMin > 0 ? 'ecart-pos' : 'ecart-neg');
+  document.getElementById('normMaxEcartD').className = 'norm-ecart ' + (ecMax > 0 ? 'ecart-pos' : 'ecart-neg');
+
+  const precipMax = daily.precipitation_probability_max[dayIdx];
+  const precipSum = daily.precipitation_sum ? daily.precipitation_sum[dayIdx] : null;
+  document.getElementById('demainPrecipText').textContent = precipMax != null ? `Probabilité max : ${precipMax} %` : '—';
+  document.getElementById('demainPrecipDetail').textContent = precipSum != null ? `Cumul estimé : ${precipSum.toFixed(1)} mm` : '';
 }
 
 function showError(msg) {
